@@ -546,6 +546,9 @@ def image_dl_estimator(framework, get_image_classifier_mx_instance):
             if wildcard is False and functional is False:
                 classifier, sess = get_image_classifier_tf(**kwargs)
                 return classifier, sess
+            else:
+                classifier, sess = get_image_classifier_tf(**kwargs)
+                return classifier, sess
         if framework == "pytorch":
             if not wildcard:
                 if functional:

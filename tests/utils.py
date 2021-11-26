@@ -163,16 +163,6 @@ def _tf_weights_loader(dataset, weights_type, layer="DENSE", tf_version=1):
             )
             return tf.constant(weights, dtype)
 
-    elif tf_version == 2:
-
-        def _tf_initializer(_, dtype):
-            import tensorflow as tf
-
-            weights = np.load(
-                os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", filename)
-            )
-            return tf.constant(weights, dtype)
-
     else:
         raise ValueError("The TensorFlow version tf_version has to be either 1 or 2.")
 
@@ -331,6 +321,51 @@ def get_image_classifier_tf_v2(from_logits=False):
 
     from art.estimators.classification.tensorflow import TensorFlowV2Classifier
 
+    def _tf_initializer_W_CONV2D_MNIST(_, dtype):
+        import tensorflow as tf
+
+        weights = np.load(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models/W_CONV2D_MNIST.npy")
+        )
+        return tf.constant(weights, dtype)
+
+    custom_objects = {'_tf_initializer_W_CONV2D_MNIST': _tf_initializer_W_CONV2D_MNIST}
+
+    tf.keras.utils.get_custom_objects().update(custom_objects)
+
+    def _tf_initializer_B_CONV2D_MNIST(_, dtype):
+        import tensorflow as tf
+
+        weights = np.load(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models/B_CONV2D_MNIST.npy")
+        )
+        return tf.constant(weights, dtype)
+
+    custom_objects = {'_tf_initializer_B_CONV2D_MNIST': _tf_initializer_B_CONV2D_MNIST}
+    tf.keras.utils.get_custom_objects().update(custom_objects)
+
+    def _tf_initializer_W_DENSE_MNIST(_, dtype):
+        import tensorflow as tf
+
+        weights = np.load(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models/W_DENSE_MNIST.npy")
+        )
+        return tf.constant(weights, dtype)
+
+    custom_objects = {'_tf_initializer_W_DENSE_MNIST': _tf_initializer_W_DENSE_MNIST}
+    tf.keras.utils.get_custom_objects().update(custom_objects)
+
+    def _tf_initializer_B_DENSE_MNIST(_, dtype):
+        import tensorflow as tf
+
+        weights = np.load(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models/B_DENSE_MNIST.npy")
+        )
+        return tf.constant(weights, dtype)
+
+    custom_objects = {'_tf_initializer_B_DENSE_MNIST': _tf_initializer_B_DENSE_MNIST}
+    tf.keras.utils.get_custom_objects().update(custom_objects)
+
     if tf.__version__[0] != "2":
         raise ImportError("This function requires TensorFlow v2.")
 
@@ -349,8 +384,8 @@ def get_image_classifier_tf_v2(from_logits=False):
             filters=1,
             kernel_size=7,
             activation="relu",
-            kernel_initializer=_tf_weights_loader("MNIST", "W", "CONV2D", 2),
-            bias_initializer=_tf_weights_loader("MNIST", "B", "CONV2D", 2),
+            kernel_initializer=_tf_initializer_W_CONV2D_MNIST,
+            bias_initializer=_tf_initializer_B_CONV2D_MNIST,
             input_shape=(28, 28, 1),
         )
     )
@@ -361,8 +396,8 @@ def get_image_classifier_tf_v2(from_logits=False):
             Dense(
                 10,
                 activation="linear",
-                kernel_initializer=_tf_weights_loader("MNIST", "W", "DENSE", 2),
-                bias_initializer=_tf_weights_loader("MNIST", "B", "DENSE", 2),
+                kernel_initializer=_tf_initializer_W_DENSE_MNIST,
+                bias_initializer=_tf_initializer_B_DENSE_MNIST,
             )
         )
     else:
@@ -370,8 +405,8 @@ def get_image_classifier_tf_v2(from_logits=False):
             Dense(
                 10,
                 activation="softmax",
-                kernel_initializer=_tf_weights_loader("MNIST", "W", "DENSE", 2),
-                bias_initializer=_tf_weights_loader("MNIST", "B", "DENSE", 2),
+                kernel_initializer=_tf_initializer_W_DENSE_MNIST,
+                bias_initializer=_tf_initializer_B_DENSE_MNIST,
             )
         )
 
