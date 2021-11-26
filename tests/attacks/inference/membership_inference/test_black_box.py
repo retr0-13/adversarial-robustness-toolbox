@@ -38,6 +38,7 @@ num_classes_iris = 3
 num_classes_mnist = 10
 
 
+@pytest.mark.skip_framework("non_dl_frameworks")
 def test_black_box_image(art_warning, get_default_mnist_subset, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(MembershipInferenceBlackBox)
@@ -163,12 +164,13 @@ def test_black_box_tabular_prob_nn(art_warning, tabular_dl_estimator_for_attack,
         art_warning(e)
 
 
+@pytest.mark.parametrize("framework_attack", ["pytorch"])
 def test_black_box_with_model_prob(
-    art_warning, tabular_dl_estimator_for_attack, estimator_for_attack, get_iris_dataset
+    art_warning, tabular_dl_estimator_for_attack, estimator_for_attack, get_iris_dataset, framework_attack
 ):
     try:
         classifier = tabular_dl_estimator_for_attack(MembershipInferenceBlackBox)
-        attack_model = estimator_for_attack(num_features=2 * num_classes_iris)
+        attack_model = estimator_for_attack(framework_attack=framework_attack, num_features=2 * num_classes_iris)
         attack = MembershipInferenceBlackBox(classifier, attack_model=attack_model)
         backend_check_membership_probabilities(attack, get_iris_dataset, attack_train_ratio)
     except ARTTestException as e:

@@ -146,13 +146,13 @@ def backend_test_classifier_type_check_fail(attack, classifier_expected_list=[],
         assert classifier_expected in exception.value.class_expected_list
 
 
-def backend_targeted_tabular(attack, fix_get_iris):
+def backend_targeted_tabular(attack, fix_get_iris, clipped):
     (_, _), (x_test_iris, y_test_iris) = fix_get_iris
 
     targets = random_targets(y_test_iris, nb_classes=3)
     x_test_adv = attack.generate(x_test_iris, **{"y": targets})
 
-    check_adverse_example_x(x_test_adv, x_test_iris)
+    check_adverse_example_x(x_test_adv, x_test_iris, bounded=clipped)
 
     y_pred_adv = np.argmax(attack.estimator.predict(x_test_adv), axis=1)
     target = np.argmax(targets, axis=1)
@@ -186,7 +186,7 @@ def backend_untargeted_tabular(attack, iris_dataset, clipped):
     # if framework in ["scikitlearn"]:
     #     np.testing.assert_array_almost_equal(np.abs(x_test_adv - x_test_iris), .1, decimal=5)
 
-    check_adverse_example_x(x_test_adv, x_test_iris)
+    check_adverse_example_x(x_test_adv, x_test_iris, bounded=clipped)
     # utils_test.check_adverse_example_x(x_test_adv, x_test_iris, bounded=clipped)
 
     y_pred_test_adv = np.argmax(attack.estimator.predict(x_test_adv), axis=1)

@@ -41,8 +41,7 @@ def fix_get_mnist_subset(get_mnist_dataset):
     yield x_train_mnist[:n_train], y_train_mnist[:n_train], x_test_mnist[:n_test], y_test_mnist[:n_test]
 
 
-# currently NOT setting this test as framework_agnostic since no TensorFlow implementation
-# of the defended classifier exists
+@pytest.mark.framework_agnostic
 def test_classifier_defended_images(art_warning, fix_get_mnist_subset, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(FastGradientMethod, defended=True)
@@ -192,7 +191,7 @@ def test_tabular(art_warning, tabular_dl_estimator, framework, get_iris_dataset,
 
         if targeted:
             attack = FastGradientMethod(classifier, targeted=True, eps=0.1, batch_size=128)
-            backend_targeted_tabular(attack, get_iris_dataset)
+            backend_targeted_tabular(attack, get_iris_dataset, clipped=clipped)
         else:
             attack = FastGradientMethod(classifier, eps=0.1)
             backend_untargeted_tabular(attack, get_iris_dataset, clipped=clipped)

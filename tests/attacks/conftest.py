@@ -25,7 +25,10 @@ logger = logging.getLogger(__name__)
 def tabular_dl_estimator_for_attack(framework, tabular_dl_estimator):
     def _tabular_dl_estimator_for_attack(attack, clipped=True):
         classifier = tabular_dl_estimator(clipped)
-        classifier_list = [classifier]
+        if isinstance(classifier, list):
+            classifier_list = classifier
+        else:
+            classifier_list = [classifier]
 
         classifier_tested = [
             potential_classifier

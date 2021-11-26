@@ -110,7 +110,7 @@ def image_dl_estimator_defended(framework):
                 defenses.append(SpatialSmoothing())
             del kwargs["defenses"]
 
-        if framework == "tensorflow2":
+        if framework in ["tensorflow1", "tensorflow2"]:
             classifier, _ = get_image_classifier_tf(**kwargs)
 
         if framework == "keras":
@@ -149,7 +149,7 @@ def image_dl_estimator_for_attack(framework, image_dl_estimator, image_dl_estima
         classifier_tested = [
             potential_classifier
             for potential_classifier in classifier_list
-            if all(t in type(potential_classifier).__mro__ for t in attack._estimator_requirements)
+            if attack.is_estimator_valid(potential_classifier, attack._estimator_requirements)
         ]
 
         if len(classifier_tested) == 0:
@@ -162,10 +162,10 @@ def image_dl_estimator_for_attack(framework, image_dl_estimator, image_dl_estima
 
 
 @pytest.fixture
-def estimator_for_attack(framework):
-    # TODO DO NOT USE THIS FIXTURE this needs to be refactored into image_dl_estimator_for_attack
-    def _get_attack_classifier_list(**kwargs):
-        if framework == "pytorch":
+def estimator_for_attack(framework_attack, **kwargs):
+    # Only use this fixture for attack models in membership inference attacks
+    def _get_attack_classifier_list(framework_attack=framework_attack, **kwargs):
+        if framework_attack == "pytorch":
             return get_attack_classifier_pt(**kwargs)
 
         raise ARTTestFixtureNotImplemented("no estimator available", image_dl_estimator_for_attack.__name__, framework)
@@ -632,12 +632,17 @@ def tabular_dl_estimator(framework):
                 classifier = KerasClassifier(model=kr_classifier.model, use_logits=False, channels_first=True)
 
         if framework == "tensorflow1" or framework == "tensorflow2":
-            if clipped:
-                classifier, _ = get_tabular_classifier_tf()
+            classifier, _ = get_tabular_classifier_tf()
+            if not clipped:
+                classifier.set_params(clip_values=None)
 
         if framework == "pytorch":
-            if clipped:
-                classifier = get_tabular_classifier_pt()
+            classifier = get_tabular_classifier_pt()
+            if not clipped:
+                classifier.set_params(clip_values=None)
+
+        if framework == "scikitlearn":
+            classifier = get_tabular_classifier_scikit_list(clipped=clipped, model_list_names=["logisticRegression"])
 
         if classifier is None:
             raise ARTTestFixtureNotImplemented(

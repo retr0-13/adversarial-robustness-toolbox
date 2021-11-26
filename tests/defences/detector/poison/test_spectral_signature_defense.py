@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 NB_TRAIN, NB_TEST, BATCH_SIZE, EPS_MULTIPLIER, UB_PCT_POISON = 300, 10, 128, 1.5, 0.2
 
 
+@pytest.mark.skip_framework("non_dl_frameworks", "mxnet")
 @pytest.mark.parametrize("params", [dict(batch_size=-1), dict(eps_multiplier=-1.0), dict(expected_pp_poison=2.0)])
 def test_wrong_parameters(params, art_warning, get_default_mnist_subset, image_dl_estimator):
     try:
