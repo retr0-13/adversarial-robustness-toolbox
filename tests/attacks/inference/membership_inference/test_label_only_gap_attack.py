@@ -42,6 +42,7 @@ def test_rule_based_image(art_warning, get_default_mnist_subset, image_dl_estima
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_rule_based_tabular(art_warning, get_iris_dataset, tabular_dl_estimator_for_attack):
     try:
         classifier = tabular_dl_estimator_for_attack(LabelOnlyGapAttack)

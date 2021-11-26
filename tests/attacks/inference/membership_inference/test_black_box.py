@@ -48,6 +48,7 @@ def test_black_box_image(art_warning, get_default_mnist_subset, image_dl_estimat
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 @pytest.mark.parametrize("model_type", ["nn", "rf", "gb"])
 def test_black_box_tabular(art_warning, model_type, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
@@ -58,6 +59,7 @@ def test_black_box_tabular(art_warning, model_type, tabular_dl_estimator_for_att
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 @pytest.mark.parametrize("model_type", ["nn", "rf", "gb"])
 def test_black_box_loss_tabular(art_warning, model_type, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
@@ -116,6 +118,7 @@ def test_black_box_keras_loss(art_warning, get_iris_dataset):
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_black_box_tabular_rf(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         classifier = tabular_dl_estimator_for_attack(MembershipInferenceBlackBox)
@@ -125,6 +128,7 @@ def test_black_box_tabular_rf(art_warning, tabular_dl_estimator_for_attack, get_
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_black_box_tabular_gb(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         classifier = tabular_dl_estimator_for_attack(MembershipInferenceBlackBox)
@@ -146,6 +150,7 @@ def test_black_box_with_model(art_warning, tabular_dl_estimator_for_attack, esti
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_black_box_tabular_prob_rf(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         classifier = tabular_dl_estimator_for_attack(MembershipInferenceBlackBox)
@@ -155,6 +160,7 @@ def test_black_box_tabular_prob_rf(art_warning, tabular_dl_estimator_for_attack,
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_black_box_tabular_prob_nn(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         classifier = tabular_dl_estimator_for_attack(MembershipInferenceBlackBox)
@@ -164,6 +170,7 @@ def test_black_box_tabular_prob_nn(art_warning, tabular_dl_estimator_for_attack,
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 @pytest.mark.parametrize("framework_attack", ["pytorch"])
 def test_black_box_with_model_prob(
     art_warning, tabular_dl_estimator_for_attack, estimator_for_attack, get_iris_dataset, framework_attack
@@ -177,6 +184,7 @@ def test_black_box_with_model_prob(
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_errors(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         classifier = tabular_dl_estimator_for_attack(MembershipInferenceBlackBox)

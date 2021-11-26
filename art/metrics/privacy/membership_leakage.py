@@ -61,8 +61,8 @@ def PDTP(  # pylint: disable=C0103
 
     supported_classifiers = (PyTorchClassifier, TensorFlowV2Classifier, ScikitlearnClassifier)
 
-    if not isinstance(target_estimator, supported_classifiers) or not isinstance(
-        extra_estimator, supported_classifiers
+    if not any(s_e in type(target_estimator).__mro__ for s_e in supported_classifiers) or not any(
+        s_e in type(extra_estimator).__mro__ for s_e in supported_classifiers
     ):
         raise ValueError("PDTP metric only supports classifiers of type PyTorch, TensorFlowV2 and ScikitLearn.")
     if target_estimator.input_shape[0] != x.shape[1]:

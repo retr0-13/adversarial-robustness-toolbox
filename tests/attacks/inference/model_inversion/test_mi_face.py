@@ -82,6 +82,7 @@ def test_miface(art_warning, fix_get_mnist_subset, image_dl_estimator_for_attack
         art_warning(e)
 
 
+@pytest.mark.skip_framework("scikitlearn")
 def test_check_params(art_warning, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(MIFace)

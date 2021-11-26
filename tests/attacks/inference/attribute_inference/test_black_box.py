@@ -356,6 +356,7 @@ def test_black_box_one_hot_float(art_warning, get_iris_dataset):
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_errors(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         classifier = tabular_dl_estimator_for_attack(AttributeInferenceBlackBox)
@@ -385,6 +386,7 @@ def test_classifier_type_check_fail():
     )
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_check_params(art_warning, tabular_dl_estimator_for_attack):
     try:
         classifier = tabular_dl_estimator_for_attack(AttributeInferenceBlackBox)

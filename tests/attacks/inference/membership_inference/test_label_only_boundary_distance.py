@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 attack_train_ratio = 0.5
 
 
+@pytest.mark.skip_framework("scikitlearn")
 def test_label_only_boundary_distance_image(art_warning, get_default_mnist_subset, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(LabelOnlyDecisionBoundary)
@@ -42,6 +43,7 @@ def test_label_only_boundary_distance_image(art_warning, get_default_mnist_subse
         art_warning(e)
 
 
+@pytest.mark.skip_framework("scikitlearn")
 def test_label_only_boundary_distance_prob(art_warning, get_default_mnist_subset, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(LabelOnlyDecisionBoundary)
@@ -51,6 +53,7 @@ def test_label_only_boundary_distance_prob(art_warning, get_default_mnist_subset
         art_warning(e)
 
 
+@pytest.mark.skip_framework("scikitlearn")
 def test_label_only_boundary_distance_prob_calib(art_warning, get_default_mnist_subset, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(LabelOnlyDecisionBoundary)
@@ -70,6 +73,7 @@ def test_label_only_boundary_distance_prob_calib(art_warning, get_default_mnist_
         art_warning(e)
 
 
+@pytest.mark.skip_framework("scikitlearn")
 def test_label_only_boundary_distance_prob_calib_unsup(
     art_warning, get_default_mnist_subset, image_dl_estimator_for_attack
 ):
@@ -150,6 +154,7 @@ def backend_check_probabilities(prob):
     assert np.all(np.sum(prob, axis=1) == 1)
 
 
+@pytest.mark.skip_framework("scikitlearn")
 def test_check_params(art_warning, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(LabelOnlyDecisionBoundary)

@@ -164,7 +164,7 @@ def test_meminf_black_box_regressor(art_warning, get_diabetes_dataset):
         art_warning(e)
 
 
-@pytest.mark.skip_framework("scikitlearn")
+@pytest.mark.skip_framework("scikitlearn", "kerastf")
 def test_meminf_black_box_dl(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         attack_feature = 2  # petal length
@@ -427,6 +427,7 @@ def test_meminf_label_only(art_warning, decision_tree_estimator, get_iris_datase
         art_warning(e)
 
 
+@pytest.mark.skip_framework("kerastf")
 def test_errors(art_warning, tabular_dl_estimator_for_attack, get_iris_dataset):
     try:
         classifier = tabular_dl_estimator_for_attack(AttributeInferenceMembership)

@@ -21,7 +21,6 @@ import logging
 import os
 import shutil
 import tempfile
-import warnings
 
 import numpy as np
 import pytest
@@ -642,7 +641,7 @@ def tabular_dl_estimator(framework):
                 classifier.set_params(clip_values=None)
 
         if framework == "scikitlearn":
-            classifier = get_tabular_classifier_scikit_list(clipped=clipped, model_list_names=["logisticRegression"])
+            classifier = get_tabular_classifier_scikit_list(clipped=clipped, model_list_names=["logisticRegression"])[0]
 
         if classifier is None:
             raise ARTTestFixtureNotImplemented(
