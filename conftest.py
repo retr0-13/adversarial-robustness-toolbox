@@ -599,7 +599,8 @@ def art_warning(request):
             # NotImplementedErrors are raised in ART whenever a test model does not exist for a specific
             # model/framework combination. By catching there here, we can provide a report at the end of each
             # pytest run list all models requiring to be implemented.
-            warnings.warn(UserWarning(exception))
+            # warnings.warn(UserWarning(exception))
+            raise exception
         else:
             raise exception
 
