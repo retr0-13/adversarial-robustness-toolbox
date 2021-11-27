@@ -376,13 +376,6 @@ def get_image_classifier_tf_v2(from_logits, loss_name, loss_type):
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
-    def train_step(model, images, labels):
-        with tf.GradientTape() as tape:
-            predictions = model(images, training=True)
-            loss = loss_object(labels, predictions)
-        gradients = tape.gradient(loss, model.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-
     model = Sequential()
     model.add(
         Conv2D(
@@ -498,7 +491,16 @@ def get_image_classifier_tf_v2(from_logits, loss_name, loss_type):
     else:
         raise ValueError("Loss name not recognised.")
 
+    loss_object = loss
+
     model.compile(optimizer=optimizer, loss=loss)
+
+    def train_step(model, images, labels):
+        with tf.GradientTape() as tape:
+            predictions = model(images, training=True)
+            loss = loss_object(labels, predictions)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
     # Create the classifier
     tfc = TensorFlowV2Classifier(

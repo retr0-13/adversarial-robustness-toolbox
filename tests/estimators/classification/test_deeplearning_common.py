@@ -31,7 +31,7 @@ def test_get_activations(art_warning, get_default_mnist_subset, framework, image
         art_warning(e)
 
 
-@pytest.mark.skip_framework("non_dl_frameworks", "tensorflow2")
+@pytest.mark.skip_framework("non_dl_frameworks", "tensorflow1", "tensorflow2", "pytorch", "mxnet")
 def test_loss_gradient_with_wildcard(art_warning, image_dl_estimator):
     try:
         classifier, _ = image_dl_estimator(wildcard=True)
@@ -105,7 +105,7 @@ def test_shapes(art_warning, get_default_mnist_subset, image_dl_estimator):
         art_warning(e)
 
 
-@pytest.mark.skip_framework("non_dl_frameworks")
+@pytest.mark.skip_framework("non_dl_frameworks", "tensorflow1", "pytorch", "mxnet")
 @pytest.mark.parametrize("from_logits", [True, False])
 @pytest.mark.parametrize(
     "loss_name",
@@ -139,9 +139,6 @@ def test_loss_functions(
 
             if loss_name + "_" + loss_type in supported_losses:
                 classifier, _ = image_dl_estimator(loss_name=loss_name, loss_type=loss_type, from_logits=from_logits)
-
-                y_test_pred_exp = np.argmax(classifier.predict(x=x_test_mnist), axis=1)
-                np.testing.assert_array_equal(y_test_pred_exp, y_test_pred_exp)
 
                 class_gradient = classifier.class_gradient(x_test_mnist, label=5)
                 # np.testing.assert_array_almost_equal(class_gradient[99, 0, 14, :, 0], class_gradient_prob_exp)
