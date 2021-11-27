@@ -187,12 +187,17 @@ def _kr_tf_weights_loader(dataset, weights_type, layer="DENSE"):
     return weights
 
 
-def get_image_classifier_tf(from_logits=False, load_init=True, sess=None):
+def get_image_classifier_tf(
+    from_logits=False, load_init=True, sess=None, loss_name="sparse_categorical_crossentropy", loss_type="class"
+):
     import tensorflow as tf
 
     if tf.__version__[0] == "2":
         # sess is not required but set to None to return 2 values for v1 and v2
-        classifier, sess = get_image_classifier_tf_v2(from_logits=from_logits), None
+        classifier, sess = (
+            get_image_classifier_tf_v2(from_logits=from_logits, loss_name=loss_name, loss_type=loss_type),
+            None,
+        )
     else:
         classifier, sess = get_image_classifier_tf_v1(from_logits=from_logits, load_init=load_init, sess=sess)
     return classifier, sess
@@ -302,7 +307,7 @@ def get_image_classifier_tf_v1(from_logits=False, load_init=True, sess=None):
     return tfc, sess
 
 
-def get_image_classifier_tf_v2(from_logits=False):
+def get_image_classifier_tf_v2(from_logits, loss_name, loss_type):
     """
     Standard TensorFlow v2 classifier for unit testing.
 
@@ -329,7 +334,7 @@ def get_image_classifier_tf_v2(from_logits=False):
         )
         return tf.constant(weights, dtype)
 
-    custom_objects = {'_tf_initializer_W_CONV2D_MNIST': _tf_initializer_W_CONV2D_MNIST}
+    custom_objects = {"_tf_initializer_W_CONV2D_MNIST": _tf_initializer_W_CONV2D_MNIST}
 
     tf.keras.utils.get_custom_objects().update(custom_objects)
 
@@ -341,7 +346,7 @@ def get_image_classifier_tf_v2(from_logits=False):
         )
         return tf.constant(weights, dtype)
 
-    custom_objects = {'_tf_initializer_B_CONV2D_MNIST': _tf_initializer_B_CONV2D_MNIST}
+    custom_objects = {"_tf_initializer_B_CONV2D_MNIST": _tf_initializer_B_CONV2D_MNIST}
     tf.keras.utils.get_custom_objects().update(custom_objects)
 
     def _tf_initializer_W_DENSE_MNIST(_, dtype):
@@ -352,7 +357,7 @@ def get_image_classifier_tf_v2(from_logits=False):
         )
         return tf.constant(weights, dtype)
 
-    custom_objects = {'_tf_initializer_W_DENSE_MNIST': _tf_initializer_W_DENSE_MNIST}
+    custom_objects = {"_tf_initializer_W_DENSE_MNIST": _tf_initializer_W_DENSE_MNIST}
     tf.keras.utils.get_custom_objects().update(custom_objects)
 
     def _tf_initializer_B_DENSE_MNIST(_, dtype):
@@ -363,7 +368,7 @@ def get_image_classifier_tf_v2(from_logits=False):
         )
         return tf.constant(weights, dtype)
 
-    custom_objects = {'_tf_initializer_B_DENSE_MNIST': _tf_initializer_B_DENSE_MNIST}
+    custom_objects = {"_tf_initializer_B_DENSE_MNIST": _tf_initializer_B_DENSE_MNIST}
     tf.keras.utils.get_custom_objects().update(custom_objects)
 
     if tf.__version__[0] != "2":
@@ -410,16 +415,95 @@ def get_image_classifier_tf_v2(from_logits=False):
             )
         )
 
-    loss_object = tf.keras.losses.SparseCategoricalCrossentropy(
-        from_logits=from_logits, reduction=tf.keras.losses.Reduction.SUM
-    )
+    if loss_name == "categorical_hinge":
+        if loss_type == "label":
+            raise AttributeError("This combination of loss function options is not supported.")
+        elif loss_type == "function":
+            loss = tf.keras.losses.categorical_hinge
+        elif loss_type == "class":
+            loss = tf.keras.losses.CategoricalHinge(reduction=tf.keras.losses.Reduction.SUM, name="categorical_hinge")
+    elif loss_name == "categorical_crossentropy":
+        if loss_type == "label":
+            if from_logits:
+                raise AttributeError("This combination of loss function options is not supported.")
+            else:
+                loss = loss_name
+        elif loss_type == "function":
+            if from_logits:
+                if int(tf.keras.__version__.split(".")[0]) == 2 and int(tf.keras.__version__.split(".")[1]) >= 3:
 
-    model.compile(optimizer=optimizer, loss=loss_object)
+                    def categorical_crossentropy(y_true, y_pred):
+                        return tf.keras.losses.categorical_crossentropy(y_true, y_pred, from_logits=True)
+
+                    loss = categorical_crossentropy
+                else:
+                    raise NotImplementedError("This combination of loss function options is not supported.")
+            else:
+                loss = tf.keras.losses.categorical_crossentropy
+        elif loss_type == "class":
+            loss = tf.keras.losses.CategoricalCrossentropy(
+                from_logits=from_logits,
+                label_smoothing=0.0,
+                axis=-1,
+                reduction=tf.keras.losses.Reduction.SUM,
+                name="categorical_crossentropy",
+            )
+        elif loss_type == "function_backend":
+            if from_logits:
+
+                def categorical_crossentropy(y_true, y_pred):
+                    return tf.keras.backend.categorical_crossentropy(y_true, y_pred, from_logits=True)
+
+                loss = categorical_crossentropy
+            else:
+                loss = tf.keras.backend.categorical_crossentropy
+    elif loss_name == "sparse_categorical_crossentropy":
+        if loss_type == "label":
+            if from_logits:
+                raise AttributeError("This combination of loss function options is not supported.")
+            else:
+                loss = loss_name
+        elif loss_type == "function":
+            if from_logits:
+                if int(tf.keras.__version__.split(".")[0]) == 2 and int(tf.keras.__version__.split(".")[1]) >= 3:
+
+                    def sparse_categorical_crossentropy(y_true, y_pred):
+                        return tf.keras.losses.sparse_categorical_crossentropy(y_true, y_pred, from_logits=True)
+
+                    loss = sparse_categorical_crossentropy
+                else:
+                    raise AttributeError("This combination of loss function options is not supported.")
+            else:
+                loss = tf.keras.losses.sparse_categorical_crossentropy
+
+        elif loss_type == "class":
+            loss = tf.keras.losses.SparseCategoricalCrossentropy(
+                from_logits=from_logits, reduction=tf.keras.losses.Reduction.SUM
+            )
+    elif loss_name == "kullback_leibler_divergence":
+        if loss_type == "label":
+            raise AttributeError("This combination of loss function options is not supported.")
+        elif loss_type == "function":
+            loss = tf.keras.losses.kullback_leibler_divergence
+        elif loss_type == "class":
+            loss = tf.keras.losses.KLDivergence(reduction=tf.keras.losses.Reduction.SUM, name="kl_divergence")
+    elif loss_name == "cosine_similarity":
+        if loss_type == "label":
+            loss = loss_name
+        elif loss_type == "function_losses":
+            loss = tf.keras.losses.cosine_similarity
+        elif loss_type == "function_backend":
+            loss = tf.keras.backend.cosine_similarity
+
+    else:
+        raise ValueError("Loss name not recognised.")
+
+    model.compile(optimizer=optimizer, loss=loss)
 
     # Create the classifier
     tfc = TensorFlowV2Classifier(
         model=model,
-        loss_object=loss_object,
+        loss_object=loss,
         train_step=train_step,
         nb_classes=10,
         input_shape=(28, 28, 1),
@@ -427,6 +511,54 @@ def get_image_classifier_tf_v2(from_logits=False):
     )
 
     return tfc
+
+
+def get_image_classifier_tf_functional(input_layer=1, output_layer=1):
+    """
+    Standard TensorFlow classifier for unit testing built with a functional model
+
+    :return: TensorFlowV2Classifier
+    """
+    import tensorflow as tf
+
+    from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, Input, MaxPooling2D
+    from tensorflow.keras.models import Model
+
+    from art.estimators.classification.tensorflow import TensorFlowV2Classifier
+
+    def functional_model():
+        in_layer = Input(shape=(28, 28, 1), name="input0")
+        layer = Conv2D(32, kernel_size=(3, 3), activation="relu")(in_layer)
+        layer = Conv2D(64, (3, 3), activation="relu")(layer)
+        layer = MaxPooling2D(pool_size=(2, 2))(layer)
+        layer = Dropout(0.25)(layer)
+        layer = Flatten()(layer)
+        layer = Dense(128, activation="relu")(layer)
+        layer = Dropout(0.5)(layer)
+        out_layer = Dense(10, activation="softmax", name="output0")(layer)
+
+        in_layer_2 = Input(shape=(28, 28, 1), name="input1")
+        layer = Conv2D(32, kernel_size=(3, 3), activation="relu")(in_layer_2)
+        layer = Conv2D(64, (3, 3), activation="relu")(layer)
+        layer = MaxPooling2D(pool_size=(2, 2))(layer)
+        layer = Dropout(0.25)(layer)
+        layer = Flatten()(layer)
+        layer = Dense(128, activation="relu")(layer)
+        layer = Dropout(0.5)(layer)
+        out_layer_2 = Dense(10, activation="softmax", name="output1")(layer)
+
+        model = Model(inputs=[in_layer, in_layer_2], outputs=[out_layer, out_layer_2])
+
+        model.compile(
+            loss=tf.keras.losses.categorical_crossentropy,
+            optimizer=tf.keras.optimizers.Adadelta(),
+            metrics=["accuracy"],
+            loss_weights=[1.0, 1.0],
+        )
+
+        return model
+
+    return TensorFlowV2Classifier(functional_model(), clip_values=(0, 1), nb_classes=10, input_shape=(28, 28, 1))
 
 
 def get_image_classifier_kr(

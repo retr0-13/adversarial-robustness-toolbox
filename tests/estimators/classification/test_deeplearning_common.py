@@ -31,7 +31,7 @@ def test_get_activations(art_warning, get_default_mnist_subset, framework, image
         art_warning(e)
 
 
-@pytest.mark.skip_framework("non_dl_frameworks")
+@pytest.mark.skip_framework("non_dl_frameworks", "tensorflow2")
 def test_loss_gradient_with_wildcard(art_warning, image_dl_estimator):
     try:
         classifier, _ = image_dl_estimator(wildcard=True)
@@ -154,7 +154,7 @@ def test_loss_functions(
         art_warning(e)
 
 
-@pytest.mark.skip_framework("non_dl_frameworks")
+@pytest.mark.skip_framework("non_dl_frameworks", "tensorflow2")
 def test_pickle(art_warning, image_dl_estimator, image_dl_estimator_defended, tmp_path):
     try:
         full_path = os.path.join(tmp_path, "my_classifier.p")
@@ -176,7 +176,7 @@ def test_pickle(art_warning, image_dl_estimator, image_dl_estimator_defended, tm
         art_warning(e)
 
 
-@pytest.mark.skip_framework("non_dl_frameworks", "pytorch")
+@pytest.mark.skip_framework("non_dl_frameworks", "pytorch", "tensorflow2")
 def test_functional_model(art_warning, image_dl_estimator):
     try:
         # Need to update the functional_model code to produce a model with more than one input and output layers...

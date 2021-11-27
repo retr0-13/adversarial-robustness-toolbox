@@ -861,7 +861,11 @@ class TensorFlowV2Classifier(ClassGradientsMixin, ClassifierMixin, TensorFlowV2E
         self._train_step = train_step
 
         # Check if the loss function requires as input index labels instead of one-hot-encoded labels
-        if isinstance(self._loss_object, tf.keras.losses.SparseCategoricalCrossentropy):
+        if isinstance(self._loss_object, tf.keras.losses.SparseCategoricalCrossentropy) or (
+            hasattr(self._loss_object, "__call__")
+            and hasattr(self._loss_object, "__name__")
+            and self.loss_object.__name__ == "sparse_categorical_crossentropy"
+        ):
             self._reduce_labels = True
         else:
             self._reduce_labels = False

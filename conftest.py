@@ -47,6 +47,7 @@ from tests.utils import (
     get_image_classifier_pt,
     get_image_classifier_pt_functional,
     get_image_classifier_tf,
+    get_image_classifier_tf_functional,
     get_tabular_classifier_kr,
     get_tabular_classifier_pt,
     get_tabular_classifier_scikit_list,
@@ -455,6 +456,8 @@ def supported_losses_types(framework):
         if framework == "kerastf":
             # if loss_type is not "label" and loss_name not in ["categorical_hinge", "kullback_leibler_divergence"]:
             return ["label", "function", "class"]
+        if framework in ["tensorflow2"]:
+            return ["function", "class"]
 
         raise ARTTestFixtureNotImplemented(
             "Could not find supported_losses_types", supported_losses_types.__name__, framework
@@ -470,6 +473,13 @@ def supported_losses_logit(framework):
             return ["categorical_crossentropy_function_backend", "sparse_categorical_crossentropy_function_backend"]
         if framework == "kerastf":
             # if loss_type is not "label" and loss_name not in ["categorical_hinge", "kullback_leibler_divergence"]:
+            return [
+                "categorical_crossentropy_function",
+                "categorical_crossentropy_class",
+                "sparse_categorical_crossentropy_function",
+                "sparse_categorical_crossentropy_class",
+            ]
+        if framework in ["tensorflow2"]:
             return [
                 "categorical_crossentropy_function",
                 "categorical_crossentropy_class",
@@ -497,6 +507,19 @@ def supported_losses_proba(framework):
                 "sparse_categorical_crossentropy_function_backend",
             ]
         if framework == "kerastf":
+            return [
+                "categorical_hinge_function",
+                "categorical_hinge_class",
+                "categorical_crossentropy_label",
+                "categorical_crossentropy_function",
+                "categorical_crossentropy_class",
+                "sparse_categorical_crossentropy_label",
+                "sparse_categorical_crossentropy_function",
+                "sparse_categorical_crossentropy_class",
+                # "kullback_leibler_divergence_function",
+                "kullback_leibler_divergence_class",
+            ]
+        if framework in ["tensorflow2"]:
             return [
                 "categorical_hinge_function",
                 "categorical_hinge_class",
@@ -547,7 +570,11 @@ def image_dl_estimator(framework, get_image_classifier_mx_instance):
                 classifier, sess = get_image_classifier_tf(**kwargs)
                 return classifier, sess
             else:
-                classifier, sess = get_image_classifier_tf(**kwargs)
+                if functional:
+                    classifier = get_image_classifier_tf_functional(**kwargs)
+                    sess = None
+                else:
+                    classifier, sess = get_image_classifier_tf(**kwargs)
                 return classifier, sess
         if framework == "pytorch":
             if not wildcard:
