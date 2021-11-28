@@ -90,25 +90,12 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture
-def image_dl_estimator_defended(framework):
+def image_dl_estimator_defended(framework, get_image_classifier_mx_instance):
     def _image_dl_estimator_defended(one_classifier=False, **kwargs):
         sess = None
         classifier = None
-
-        clip_values = (0, 1)
-        fs = FeatureSqueezing(bit_depth=2, clip_values=clip_values)
-
-        defenses = []
-        if kwargs.get("defenses") is None:
-            defenses.append(fs)
-        else:
-            if "FeatureSqueezing" in kwargs.get("defenses"):
-                defenses.append(fs)
-            if "JpegCompression" in kwargs.get("defenses"):
-                defenses.append(JpegCompression(clip_values=clip_values, apply_predict=True))
-            if "SpatialSmoothing" in kwargs.get("defenses"):
-                defenses.append(SpatialSmoothing())
-            del kwargs["defenses"]
+        defenses_names = kwargs.get("defenses")
+        del kwargs["defenses"]
 
         if framework in ["tensorflow1", "tensorflow2"]:
             classifier, _ = get_image_classifier_tf(**kwargs)
@@ -121,15 +108,24 @@ def image_dl_estimator_defended(framework):
 
         if framework == "pytorch":
             classifier = get_image_classifier_pt(**kwargs)
-            for i, defense in enumerate(defenses):
-                if "channels_first" in defense.params:
-                    defenses[i].channels_first = classifier.channels_first
+
+        if framework == "mxnet":
+            classifier = get_image_classifier_mx_instance(**kwargs)
 
         if classifier is not None:
+            defenses = list()
+
+            if "FeatureSqueezing" in defenses_names:
+                defenses.append(FeatureSqueezing(bit_depth=2, clip_values=classifier.clip_values))
+            if "JpegCompression" in defenses_names:
+                defenses.append(JpegCompression(clip_values=classifier.clip_values, apply_predict=True, channels_first=classifier.channels_first))
+            if "SpatialSmoothing" in defenses_names:
+                defenses.append(SpatialSmoothing(channels_first=classifier.channels_first))
+
             classifier.set_params(preprocessing_defences=defenses)
         else:
             raise ARTTestFixtureNotImplemented(
-                "no defended image estimator", image_dl_estimator_defended.__name__, framework, {"defenses": defenses}
+                "no defended image estimator", image_dl_estimator_defended.__name__, framework
             )
 
         return classifier, sess

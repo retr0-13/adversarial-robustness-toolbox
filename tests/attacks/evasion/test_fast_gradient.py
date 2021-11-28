@@ -44,7 +44,7 @@ def fix_get_mnist_subset(get_mnist_dataset):
 @pytest.mark.framework_agnostic
 def test_classifier_defended_images(art_warning, fix_get_mnist_subset, image_dl_estimator_for_attack):
     try:
-        classifier = image_dl_estimator_for_attack(FastGradientMethod, defended=True)
+        classifier = image_dl_estimator_for_attack(FastGradientMethod, defended=True, defenses=["JpegCompression"])
         attack = FastGradientMethod(classifier, eps=1.0, batch_size=128)
         backend_test_defended_images(attack, fix_get_mnist_subset)
     except ARTTestException as e:

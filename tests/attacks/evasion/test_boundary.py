@@ -45,7 +45,7 @@ def test_tabular(art_warning, tabular_dl_estimator, framework, get_iris_dataset,
         classifier = tabular_dl_estimator(clipped=clipped_classifier)
         attack = BoundaryAttack(classifier, targeted=targeted, max_iter=10, verbose=False)
         if targeted:
-            backend_targeted_tabular(attack, get_iris_dataset)
+            backend_targeted_tabular(attack, get_iris_dataset, clipped=clipped_classifier)
         else:
             backend_untargeted_tabular(attack, get_iris_dataset, clipped=clipped_classifier)
     except ARTTestException as e:
