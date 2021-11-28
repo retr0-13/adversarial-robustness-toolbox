@@ -19,7 +19,7 @@
 This module implements membership leakage metrics.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
-from typing import TYPE_CHECKING, Optional
+from typing import List, TYPE_CHECKING, Optional
 
 import numpy as np
 import scipy
@@ -36,7 +36,7 @@ def PDTP(  # pylint: disable=C0103
     x: np.ndarray,
     y: np.ndarray,
     indexes: Optional[np.ndarray] = None,
-    num_iter: Optional[int] = 10,
+    num_iter: int = 10,
 ) -> np.ndarray:
     """
     Compute the pointwise differential training privacy metric for the given classifier and training set.
@@ -71,10 +71,10 @@ def PDTP(  # pylint: disable=C0103
     if y.shape[0] != x.shape[0]:
         raise ValueError("Number of rows in x and y do not match")
 
-    results = []
+    results: List[List[float]] = list()
 
     for _ in range(num_iter):
-        iter_results = []
+        iter_results: List[float] = list()
         # get probabilities from original model
         pred = target_estimator.predict(x)
         if not is_probability(pred):
@@ -94,7 +94,7 @@ def PDTP(  # pylint: disable=C0103
             alt_x = np.delete(x, row, 0)
             alt_y = np.delete(y, row, 0)
             try:
-                extra_estimator.reset()
+                extra_estimator.reset()  # type: ignore
             except NotImplementedError as exc:  # pragma: no cover
                 raise ValueError(
                     "PDTP metric can only be applied to classifiers that implement the reset method."
@@ -116,7 +116,7 @@ def PDTP(  # pylint: disable=C0103
 
     # get average of iterations for each sample
     # We now have a list of list, internal lists represent an iteration. We need to transpose and get averages.
-    per_sample = list(map(list, zip(*results)))
+    per_sample: List[List[float]] = list(map(list, zip(*results)))
     avg_per_sample = np.array([sum(val) / len(val) for val in per_sample])
 
     # return leakage per sample
