@@ -300,7 +300,7 @@ class MXClassifier(ClassGradientsMixin, ClassifierMixin, MXEstimator):  # lgtm [
         return predictions
 
     def class_gradient(  # pylint: disable=W0221
-        self, x: np.ndarray, label: Union[int, List[int], None] = None, training_mode: bool = False, **kwargs
+        self, x: np.ndarray, label: Union[int, List[int], None] = None, training_mode: bool = True, **kwargs
     ) -> np.ndarray:
         """
         Compute per-class derivatives w.r.t. `x`.
@@ -336,23 +336,23 @@ class MXClassifier(ClassGradientsMixin, ClassifierMixin, MXEstimator):  # lgtm [
         x_preprocessed.attach_grad()
 
         if label is None:
-            with mx.autograd.record(train_mode=False):
+            with mx.autograd.record(train_mode=training_mode):
                 preds = self._model(x_preprocessed)
                 class_slices = [preds[:, i] for i in range(self.nb_classes)]
 
-            grads = []
-            for slice_ in class_slices:
-                slice_.backward(retain_graph=True)
-                grad = x_preprocessed.grad.asnumpy()
-                grads.append(grad)
-            grads = np.swapaxes(np.array(grads), 0, 1)
+                grads = []
+                for slice_ in class_slices:
+                    slice_.backward(retain_graph=True)
+                    grad = x_preprocessed.grad.asnumpy()
+                    grads.append(grad)
+                grads = np.swapaxes(np.array(grads), 0, 1)
         elif isinstance(label, (int, np.integer)):
             with mx.autograd.record(train_mode=training_mode):
                 preds = self._model(x_preprocessed)
                 class_slice = preds[:, label]
 
-            class_slice.backward()
-            grads = np.expand_dims(x_preprocessed.grad.asnumpy(), axis=1)
+                class_slice.backward()
+                grads = np.expand_dims(x_preprocessed.grad.asnumpy(), axis=1)
         else:
             unique_labels = list(np.unique(label))
 
@@ -360,11 +360,11 @@ class MXClassifier(ClassGradientsMixin, ClassifierMixin, MXEstimator):  # lgtm [
                 preds = self._model(x_preprocessed)
                 class_slices = [preds[:, i] for i in unique_labels]
 
-            grads = []
-            for slice_ in class_slices:
-                slice_.backward(retain_graph=True)
-                grad = x_preprocessed.grad.asnumpy()
-                grads.append(grad)
+                grads = []
+                for slice_ in class_slices:
+                    slice_.backward(retain_graph=True)
+                    grad = x_preprocessed.grad.asnumpy()
+                    grads.append(grad)
 
             grads = np.swapaxes(np.array(grads), 0, 1)
             lst = [unique_labels.index(i) for i in label]
@@ -376,7 +376,7 @@ class MXClassifier(ClassGradientsMixin, ClassifierMixin, MXEstimator):  # lgtm [
         return grads
 
     def loss_gradient(  # pylint: disable=W0221
-        self, x: np.ndarray, y: np.ndarray, training_mode: bool = False, **kwargs
+        self, x: np.ndarray, y: np.ndarray, training_mode: bool = True, **kwargs
     ) -> np.ndarray:
         """
         Compute the gradient of the loss function w.r.t. `x`.
