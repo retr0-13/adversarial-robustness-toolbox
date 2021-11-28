@@ -163,6 +163,16 @@ def _tf_weights_loader(dataset, weights_type, layer="DENSE", tf_version=1):
             )
             return tf.constant(weights, dtype)
 
+    elif tf_version == 2:
+
+        def _tf_initializer(_, dtype):
+            import tensorflow as tf
+
+            weights = np.load(
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), "utils/resources/models", filename)
+            )
+            return tf.constant(weights, dtype)
+
     else:
         raise ValueError("The TensorFlow version tf_version has to be either 1 or 2.")
 
