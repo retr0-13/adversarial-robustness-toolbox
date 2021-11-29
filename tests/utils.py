@@ -447,7 +447,6 @@ def get_image_classifier_tf_v2(from_logits, loss_name, loss_type):
             loss = tf.keras.losses.CategoricalCrossentropy(
                 from_logits=from_logits,
                 label_smoothing=0.0,
-                axis=-1,
                 reduction=tf.keras.losses.Reduction.SUM,
                 name="categorical_crossentropy",
             )

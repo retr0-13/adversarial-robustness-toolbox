@@ -33,6 +33,7 @@ num_classes_iris = 3
 num_classes_mnist = 10
 
 
+@pytest.mark.skip_framework("scikitlearn")
 def test_rule_based_image(art_warning, get_default_mnist_subset, image_dl_estimator_for_attack):
     try:
         classifier = image_dl_estimator_for_attack(LabelOnlyGapAttack)
@@ -47,7 +48,7 @@ def test_rule_based_tabular(art_warning, get_iris_dataset, tabular_dl_estimator_
     try:
         classifier = tabular_dl_estimator_for_attack(LabelOnlyGapAttack)
         attack = LabelOnlyGapAttack(classifier)
-        backend_check_membership_accuracy_no_fit(attack, get_iris_dataset, 0.06)
+        backend_check_membership_accuracy_no_fit(attack, get_iris_dataset, 0.12)
     except ARTTestException as e:
         art_warning(e)
 

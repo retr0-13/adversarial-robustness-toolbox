@@ -118,7 +118,11 @@ def image_dl_estimator_defended(framework, get_image_classifier_mx_instance):
             if "FeatureSqueezing" in defenses_names:
                 defenses.append(FeatureSqueezing(bit_depth=2, clip_values=classifier.clip_values))
             if "JpegCompression" in defenses_names:
-                defenses.append(JpegCompression(clip_values=classifier.clip_values, apply_predict=True, channels_first=classifier.channels_first))
+                defenses.append(
+                    JpegCompression(
+                        clip_values=classifier.clip_values, apply_predict=True, channels_first=classifier.channels_first
+                    )
+                )
             if "SpatialSmoothing" in defenses_names:
                 defenses.append(SpatialSmoothing(channels_first=classifier.channels_first))
 
@@ -561,7 +565,7 @@ def image_dl_estimator(framework, get_image_classifier_mx_instance):
                             image_dl_estimator.__name__,
                             framework,
                         )
-        if framework == "tensorflow1" or framework == "tensorflow2":
+        if framework in ["tensorflow1", "tensorflow2v1", "tensorflow2"]:
             if wildcard is False and functional is False:
                 classifier, sess = get_image_classifier_tf(**kwargs)
                 return classifier, sess
