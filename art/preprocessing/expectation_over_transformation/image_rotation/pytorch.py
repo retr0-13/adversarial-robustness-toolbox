@@ -99,10 +99,7 @@ class EoTImageRotationPyTorch(EoTPyTorch):
             x = torch.permute(x, (0, 3, 1, 2))
             channels_first = False
 
-        if self.label_type == "object_detection":
-            expand = True
-        else:
-            expand = False
+        expand = bool(self.label_type == "object_detection")
 
         x_preprocess = torchvision.transforms.functional.rotate(
             img=x,
@@ -215,7 +212,7 @@ class EoTImageRotationPyTorch(EoTPyTorch):
                 raise ValueError(
                     """For `label_type="object_detection"` only a list of multiples of 90 degrees is supported."""
                 )
-            for angle in self.angles:
+            for angle in self.angles:  # lgtm [py/non-iterable-in-for-loop]
                 if divmod(angle, 90)[1] != 0:
                     raise ValueError(
                         """For `label_type="object_detection"` only a list of multiples of 90 degrees is supported."""
